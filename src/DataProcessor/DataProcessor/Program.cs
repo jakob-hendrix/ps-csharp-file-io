@@ -7,27 +7,35 @@ namespace DataProcessor
     {
         static void Main(string[] args)
         {
+            WriteLine("Parsing command line arguments\n");
+            WriteLine($"Command: {args[0]}\nTarget: {args[1]}\n");
+
+            // command line validation omitted for brevity
+
             var command = args[0];
 
-            if (command == "--file")
+
+            switch (command)
             {
-                var filePath = args[1];
-                WriteLine($"Single file {filePath} selected");
-                ProcessSingleFile(filePath);
-            }
-            else if (command == "--dir")
-            {
-                var directoryPath = args[1];
-                var fileType = args[2];
-                WriteLine($"Directory {directoryPath} selected for {fileType} files");
-                ProcessDirectory(directoryPath, fileType);
-            }
-            else
-            {
-                WriteLine("Invalid command line options");
+                case "--file":
+                    var filePath = args[1];
+                    WriteLine($"Single file {filePath} selected");
+                    ProcessSingleFile(filePath);
+                    break;
+
+                case "--dir":
+                    var directoryPath = args[1];
+                    var fileType = args[2];
+                    WriteLine($"Directory {directoryPath} selected for {fileType} files");
+                    ProcessDirectory(directoryPath, fileType);
+                    break;
+
+                default:
+                    WriteLine("Invalid command line options");
+                    break;
             }
 
-            WriteLine("Press enter to quit");
+            WriteLine("\nPress enter to quit");
             ReadLine();
         }
 
