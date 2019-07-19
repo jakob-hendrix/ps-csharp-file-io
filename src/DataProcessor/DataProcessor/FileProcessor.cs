@@ -22,7 +22,7 @@ namespace DataProcessor
 
         public void Process()
         {
-            WriteLine($"Begin processing of: {InputFilePath}");
+            WriteLine($"\nBegin processing of: {InputFilePath}");
 
             if (!File.Exists(InputFilePath))
             {
@@ -33,8 +33,8 @@ namespace DataProcessor
             string inputFileDirectory = Path.GetDirectoryName(InputFilePath);
             string rootDirectoryPath = new DirectoryInfo(inputFileDirectory).Parent.FullName;
 
-            WriteLine($"Input Directory is: {inputFileDirectory}");
-            WriteLine($"Root data path is: {rootDirectoryPath}");
+            //WriteLine($"Input Directory is: {inputFileDirectory}");
+            //WriteLine($"Root data path is: {rootDirectoryPath}");
 
             // Check if a backup directory exists. If not, go ahead an make it
             string backupDirectoryPath = Path.Combine(rootDirectoryPath, BackupDirectoryName);
@@ -50,15 +50,14 @@ namespace DataProcessor
             string inputFileName = Path.GetFileName(InputFilePath);
             string backupFilePath = Path.Combine(backupDirectoryPath, inputFileName);
 
-            WriteLine($"Copying to backup: {InputFilePath} -> {backupFilePath}");
+            //WriteLine($"Copying to backup: {InputFilePath} -> {backupFilePath}");
             File.Copy(InputFilePath, backupFilePath, true);  // will overwrite the destination file
-
-
+            
             // Move to in-progress
             Directory.CreateDirectory(Path.Combine(rootDirectoryPath, InProgressDirectoryName));
             string inProgressFilePath = Path.Combine(rootDirectoryPath, InProgressDirectoryName, inputFileName);
 
-            WriteLine($"Moving to in-progress: {InputFilePath} -> {inProgressFilePath}");
+            //WriteLine($"Moving to in-progress: {InputFilePath} -> {inProgressFilePath}");
             if (File.Exists(inProgressFilePath))
             {
                 WriteLine($"ERROR: a file with the name {inProgressFilePath} is already being processed");
@@ -67,7 +66,6 @@ namespace DataProcessor
             File.Move(InputFilePath, inProgressFilePath);
 
             // Determine the type of file
-            WriteLine("Validating file type");
             string extention = Path.GetExtension(InputFilePath);
             switch (extention)
             {
@@ -92,7 +90,7 @@ namespace DataProcessor
 
             var completedFilePath = Path.Combine(completedDirectoryPath, completedFileName);
 
-            WriteLine($"Moving processed file: {inProgressFilePath} -> {completedFilePath}");
+            //WriteLine($"Moving processed file: {inProgressFilePath} -> {completedFilePath}");
             File.Move(inProgressFilePath, completedFilePath);
 
             string inProgressDirectoryPath = Path.GetDirectoryName(inProgressFilePath);

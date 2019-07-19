@@ -9,38 +9,72 @@ namespace DataProcessor
         static void Main(string[] args)
         {
             WriteLine("Parsing command line arguments\n");
-            WriteLine($"Command: {args[0]}\nTarget: {args[1]}\n");
 
-            // command line validation omitted for brevity
-
-            var command = args[0];
-
-
-            switch (command)
+            var directoryToWatch = args[0];
+            if (!Directory.Exists(directoryToWatch))
             {
-                case "--file":
-                    var filePath = args[1];
-                    WriteLine($"Single file {filePath} selected");
-                    ProcessSingleFile(filePath);
-                    break;
-
-                case "--dir":
-                    var directoryPath = args[1];
-                    var fileType = args[2];
-                    WriteLine($"Directory {directoryPath} selected for {fileType} files");
-                    ProcessDirectory(directoryPath, fileType);
-                    break;
-
-                default:
-                    WriteLine("Invalid command line options");
-                    break;
+                WriteLine($"ERROR: {directoryToWatch} does not exist");
             }
+            else
+            {
+                WriteLine($"Watching directory {directoryToWatch} for changes...");
 
-            WriteLine("\nPress enter to quit");
-            ReadLine();
+                // FileSystemWatcher implements IDisposable, huzzah!
+                using (var watcher = new FileSystemWatcher(directoryToWatch))
+                {
+                    watcher.IncludeSubdirectories = false;
+                    watcher.InternalBufferSize = 32768; // 32k
+                    watcher.Filter = "*.*"; // default filter
+
+                    // What parts of a file can trigger an event
+                    watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
+
+                    // Wire up our desired events methods
+                    watcher.Created += FileCreated;
+                    watcher.Changed += FileChanged;
+                    watcher.Deleted += FileDeleted;
+                    watcher.Renamed += FileRenamed;
+                    watcher.Error += WatcherError;
+
+                    // Enables this watcher
+                    watcher.EnableRaisingEvents = true;
+
+                    WriteLine($"Press enter to quit.");
+                    ReadLine();
+                }
+            }
         }
 
+        private static void WatcherError(object sender, ErrorEventArgs e)
+        {
+            WriteLine($"ERROR: file system watching may no longer be active: {e.GetException()}");
+        }
 
+        private static void FileRenamed(object sender, RenamedEventArgs e)
+        {
+            WriteLine($"* File renamed: {e.Name} - Type: {e.ChangeType}");
+        }
+
+        private static void FileDeleted(object sender, FileSystemEventArgs e)
+        {
+            WriteLine($"* File deleted: {e.Name} - Type: {e.ChangeType}");
+        }
+
+        private static void FileChanged(object sender, FileSystemEventArgs e)
+        {
+            WriteLine($"* File changed: {e.Name} - Type: {e.ChangeType}");
+
+            var processor = new FileProcessor(e.FullPath);
+            processor.Process();
+        }
+
+        private static void FileCreated(object sender, FileSystemEventArgs e)
+        {
+            WriteLine($"* File created: {e.Name} - Type: {e.ChangeType}");
+
+            var processor = new FileProcessor(e.FullPath);
+            processor.Process();
+        }
 
         private static void ProcessSingleFile(string filePath)
         {
