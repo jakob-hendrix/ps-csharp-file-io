@@ -32,25 +32,15 @@ namespace DataProcessor
 
             string inputFileDirectory = Path.GetDirectoryName(InputFilePath);
             string rootDirectoryPath = new DirectoryInfo(inputFileDirectory).Parent.FullName;
-
-            //WriteLine($"Input Directory is: {inputFileDirectory}");
-            //WriteLine($"Root data path is: {rootDirectoryPath}");
-
+            
             // Check if a backup directory exists. If not, go ahead an make it
             string backupDirectoryPath = Path.Combine(rootDirectoryPath, BackupDirectoryName);
 
-            //if (!Directory.Exists(backupDirectoryPath))
-            //{
-            //    WriteLine($"Creating: {backupDirectoryPath}");
-            //    Directory.CreateDirectory(backupDirectoryPath);
-            //}
             Directory.CreateDirectory(backupDirectoryPath);
 
             // Copy file to backup dir
             string inputFileName = Path.GetFileName(InputFilePath);
             string backupFilePath = Path.Combine(backupDirectoryPath, inputFileName);
-
-            //WriteLine($"Copying to backup: {InputFilePath} -> {backupFilePath}");
             File.Copy(InputFilePath, backupFilePath, true);  // will overwrite the destination file
             
             // Move to in-progress
@@ -67,42 +57,26 @@ namespace DataProcessor
 
             // Determine the type of file
             string extention = Path.GetExtension(InputFilePath);
+
+            string completedDirectoryPath = Path.Combine(rootDirectoryPath, CompletedDirectoryName);
+            Directory.CreateDirectory(completedDirectoryPath);
+            var completedFileName = $"{Path.GetFileNameWithoutExtension(InputFilePath)}-{Guid.NewGuid()}{extention}";
+            var completedFilePath = Path.Combine(completedDirectoryPath, completedFileName);
+
+            // Process the file
             switch (extention)
             {
                 case ".txt":
-                    ProcessTextFile(inProgressFilePath);
+                    var textProcess = new TextFileProcessor(inProgressFilePath, completedFilePath);
+                    textProcess.Process();
                     break;
                 default:
                     WriteLine($"{extention} is an unsupported file type.");
                     break;
             }
 
-            // Archive the file
-            string completedDirectoryPath = Path.Combine(rootDirectoryPath, CompletedDirectoryName);
-            Directory.CreateDirectory(completedDirectoryPath);
-
-            // Create a random filename using a GUID to avoid issues with the move function
-            var completedFileName = $"{Path.GetFileNameWithoutExtension(InputFilePath)}-{Guid.NewGuid()}{extention}";
-
-            // Wanna change or add a new extension?
-            //completedFileName = Path.ChangeExtension(completedFileName, ".complete");
-            //completedFileName = $"{completedFileName}.complete";
-
-            var completedFilePath = Path.Combine(completedDirectoryPath, completedFileName);
-
-            //WriteLine($"Moving processed file: {inProgressFilePath} -> {completedFilePath}");
-            File.Move(inProgressFilePath, completedFilePath);
-
-            //string inProgressDirectoryPath = Path.GetDirectoryName(inProgressFilePath);
-            //Directory.Delete(inProgressDirectoryPath, true);  // will recursively delete contents
-
             WriteLine($"Processing complete for: {InputFilePath}\n\n");
-        }
-
-        private void ProcessTextFile(string inputFile)
-        {
-            WriteLine($"Processing text file: {inputFile}");
-            // Read in and process
+            File.Delete(inProgressFilePath);
         }
     }
 }

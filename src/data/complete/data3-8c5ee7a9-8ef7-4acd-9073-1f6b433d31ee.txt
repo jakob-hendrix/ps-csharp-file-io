@@ -1,3 +1,0 @@
-Hello data 3
-This is line 2
-This is line 3

@@ -32,8 +32,6 @@ namespace DataProcessor
                  * while our timer will perodically process all items in that dictionary
                  */
                 using (var watcher = new FileSystemWatcher(directoryToWatch))
-                //using (var timer = new Timer(ProcessFiles, null, 0, 1000))
-
                 {
                     watcher.IncludeSubdirectories = false;
                     watcher.InternalBufferSize = 32768; // 32k
@@ -100,14 +98,7 @@ namespace DataProcessor
             ProcessSingleFile(e.FullPath);
         }
 
-        private static void ProcessSingleFile(string filePath)
-        {
-            //RunProcessOnFile(filePath);
-
-            /* If the file already exists in this dictionary, it won't be added again */
-            //FilesToProcess.TryAdd(filePath, filePath);
-            AddToCache(filePath);
-        }
+        private static void ProcessSingleFile(string filePath) =>  AddToCache(filePath);
 
         private static void AddToCache(string filePath)
         {
