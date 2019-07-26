@@ -93,8 +93,8 @@ namespace DataProcessor
             //WriteLine($"Moving processed file: {inProgressFilePath} -> {completedFilePath}");
             File.Move(inProgressFilePath, completedFilePath);
 
-            string inProgressDirectoryPath = Path.GetDirectoryName(inProgressFilePath);
-            Directory.Delete(inProgressDirectoryPath, true);  // will recursively delete contents
+            //string inProgressDirectoryPath = Path.GetDirectoryName(inProgressFilePath);
+            //Directory.Delete(inProgressDirectoryPath, true);  // will recursively delete contents
 
             WriteLine($"Processing complete for: {InputFilePath}\n\n");
         }
